@@ -5,6 +5,7 @@
  *   - fireblocks
  *   - privy
  *   - turnkey
+ *   - cdp
  *   - keypair
  *
  * Usage:
@@ -21,6 +22,7 @@
  */
 
 import { assertIsSolanaSigner, SolanaSigner } from '@solana/keychain-core';
+import { CdpSigner } from '@solana/keychain-cdp';
 import { FireblocksSigner } from '@solana/keychain-fireblocks';
 import { PrivySigner } from '@solana/keychain-privy';
 import { TurnkeySigner } from '@solana/keychain-turnkey';
@@ -54,7 +56,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config({ path: './.env' });
 
-type SignerType = 'fireblocks' | 'privy' | 'turnkey' | 'keypair';
+type SignerType = 'fireblocks' | 'privy' | 'turnkey' | 'cdp' | 'keypair';
 
 function getSignerType(): SignerType {
     const signerEnv = process.env.SIGNER_TYPE;
@@ -62,7 +64,7 @@ function getSignerType(): SignerType {
         throw new Error('SIGNER_TYPE is not set');
     }
     const signerType = signerEnv.toLowerCase() as SignerType;
-    if (signerType !== 'fireblocks' && signerType !== 'privy' && signerType !== 'turnkey' && signerType !== 'keypair') {
+    if (signerType !== 'fireblocks' && signerType !== 'privy' && signerType !== 'turnkey' && signerType !== 'cdp' && signerType !== 'keypair') {
         throw new Error(`Invalid signer type: ${signerType}`);
     }
     return signerType;
@@ -120,6 +122,18 @@ const SIGNER_CONFIGS: Record<SignerType, SignerConfig> = {
                 privateKeyId: process.env.TURNKEY_PRIVATE_KEY_ID!,
                 publicKey: process.env.TURNKEY_PUBLIC_KEY!,
                 apiBaseUrl: process.env.TURNKEY_API_BASE_URL,
+            });
+        },
+    },
+    cdp: {
+        requiredEnvVars: ['CDP_API_KEY_ID', 'CDP_API_KEY_SECRET', 'CDP_WALLET_SECRET'],
+        create: async () => {
+            return await CdpSigner.create({
+                apiKeyId: process.env.CDP_API_KEY_ID!,
+                apiKeySecret: process.env.CDP_API_KEY_SECRET!,
+                walletSecret: process.env.CDP_WALLET_SECRET!,
+                accountName: process.env.CDP_SOLANA_ACCOUNT_NAME,
+                accountAddress: process.env.CDP_SOLANA_ACCOUNT_ADDRESS,
             });
         },
     },
