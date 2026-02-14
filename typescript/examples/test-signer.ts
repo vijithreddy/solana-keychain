@@ -168,6 +168,15 @@ function validateEnv(signerType: SignerType) {
         console.error('Please copy .env.example to .env and fill in your credentials');
         process.exit(1);
     }
+
+    // CDP requires either account name or account address
+    if (signerType === 'cdp') {
+        if (!process.env.CDP_SOLANA_ACCOUNT_NAME && !process.env.CDP_SOLANA_ACCOUNT_ADDRESS) {
+            console.error('CDP signer requires either CDP_SOLANA_ACCOUNT_NAME or CDP_SOLANA_ACCOUNT_ADDRESS');
+            console.error('Please set one of these environment variables in your .env file');
+            process.exit(1);
+        }
+    }
 }
 
 async function createSigner(signerType: SignerType): Promise<SolanaSigner | KeyPairSigner> {

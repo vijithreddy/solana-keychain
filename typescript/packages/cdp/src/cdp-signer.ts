@@ -4,6 +4,7 @@ import { getBase58Encoder, getBase64Encoder, getUtf8Decoder } from '@solana/code
 import {
     createSignatureDictionary,
     extractSignatureFromWireTransaction,
+    SignerError,
     SignerErrorCode,
     SolanaSigner,
     throwSignerError,
@@ -108,7 +109,7 @@ export class CdpSigner<TAddress extends string = string> implements SolanaSigner
 
             return new CdpSigner<TAddress>(config, cdp, accountAddress, address);
         } catch (error) {
-            if (error && typeof error === 'object' && 'code' in error) {
+            if (error instanceof SignerError) {
                 throw error; // Re-throw SignerError
             }
             throwSignerError(SignerErrorCode.CONFIG_ERROR, {
@@ -214,7 +215,7 @@ export class CdpSigner<TAddress extends string = string> implements SolanaSigner
 
             return signatureBytes as SignatureBytes;
         } catch (error) {
-            if (error && typeof error === 'object' && 'code' in error) {
+            if (error instanceof SignerError) {
                 throw error; // Re-throw SignerError
             }
             throwSignerError(SignerErrorCode.SIGNING_FAILED, {
